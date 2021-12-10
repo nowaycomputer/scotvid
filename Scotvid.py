@@ -104,7 +104,7 @@ plt.text(s='Latest Average: '+str(np.round(last_week,2))+'%',x=df_hospital['Hosp
 #
 
 plt.subplot(2,3,5)
-df_hospital['ICUAdmissions']
+
 ((df_hospital['ICUAdmissions'].iloc[-RANGE:-1]/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100).plot(c='C4',alpha=0.5)
 ((df_hospital['ICUAdmissions'].iloc[-RANGE:-1]/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100).rolling(window=7).mean().plot(c='C4',lw=3)
 
@@ -142,3 +142,5 @@ plt.text(s='Last Week: '+str(int(df_hospital['DailyDeaths'].iloc[-RANGE:-DEATH_D
 
 x_min, x_max = axes.get_xlim()
 axes.set_xlim(x_min, x_max+2)
+
+plt.show()
