@@ -175,4 +175,6 @@ def make_plots():
 
     st.pyplot(fig)
 
-make_plots()
+with st.spinner('Grabbing latest data...'):
+    make_plots()
+st.success('Done! Data is updated each weekday at 2pm. Very hacky/basic code available at [https://github.com/nowaycomputer/scotvid](https://github.com/nowaycomputer/scotvid)')
