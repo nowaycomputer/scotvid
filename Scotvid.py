@@ -9,7 +9,7 @@ ICU_OFFSET=14
 FONT_SIZE=12
 DEATH_DELAY=3
 
-@st.cache(suppress_st_warning=True)
+st.set_page_config(layout="wide")
 
 def get_remote_data():
     df_cases=pd.read_csv('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/287fc645-4352-4477-9c8c-55bc054b7e76/download/daily_cuml_scot_20211206.csv', index_col='Date',parse_dates=True)
@@ -28,6 +28,7 @@ def get_local_data():
 
     return df_cases, df_hospital
 
+# @st.cache(suppress_st_warning=True, show_spinner=False)
 def get_data():
     try:
         df_cases, df_hospital = get_remote_data()
@@ -37,7 +38,7 @@ def get_data():
         return df_cases, df_hospital
 
 
-@st.cache(suppress_st_warning=True)
+# @st.cache(suppress_st_warning=True, show_spinner=False)
 def make_plots():
 
     df_cases, df_hospital = get_data()
