@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import streamlit as st
 
 RANGE=120
 HOSPITAL_OFFSET=7
@@ -143,4 +144,4 @@ plt.text(s='Last Week: '+str(int(df_hospital['DailyDeaths'].iloc[-RANGE:-DEATH_D
 x_min, x_max = axes.get_xlim()
 axes.set_xlim(x_min, x_max+2)
 
-plt.show()
+st.pyplot(fig)
