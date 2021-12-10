@@ -12,8 +12,8 @@ DEATH_DELAY=3
 st.set_page_config(layout="wide")
 
 def get_remote_data():
-    df_cases=pd.read_csv('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/287fc645-4352-4477-9c8c-55bc054b7e76/download/daily_cuml_scot_20211206.csv', index_col='Date',parse_dates=True)
-    df_hospital=pd.read_csv('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/2dd8534b-0a6f-4744-9253-9565d62f96c2/download/trend_hb_20211206.csv', index_col='Date',parse_dates=True)
+    df_cases=pd.read_csv('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/287fc645-4352-4477-9c8c-55bc054b7e76/download/daily_cuml_scot_20211210.csv', index_col='Date',parse_dates=True)
+    df_hospital=pd.read_csv('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/2dd8534b-0a6f-4744-9253-9565d62f96c2/download/trend_hb_20211210.csv', index_col='Date',parse_dates=True)
     df_hospital=df_hospital[df_hospital['HBName']=='Scotland']
 
     df_cases.to_csv('df_cases.csv')
@@ -44,8 +44,9 @@ def make_plots():
     df_cases, df_hospital = get_data()
 
     fig=plt.figure(figsize=(20,10))
-    fig.suptitle('Scotland Covid Update (Data up to '+df_cases.index[-1].strftime("%d/%m/%Y")+")", fontsize=20)
-
+    # fig.suptitle('Scotland Covid Update (Data up to '+df_cases.index[-1].strftime("%d/%m/%Y")+")", fontsize=20)
+    st.title('Scotland Covid Update')
+    st.header('(Data up to '+df_cases.index[-1].strftime("%d/%m/%Y")+")")
     #
     # Cases
     #
@@ -174,7 +175,14 @@ def make_plots():
     axes.set_xlim(x_min, x_max+2)
 
     st.pyplot(fig)
+    data=pd.merge(df_hospital, df_cases, left_index=True, right_index=True)
+    data.to_csv('merged_data.csv')
+    return data
 
 with st.spinner('Grabbing latest data...'):
-    make_plots()
-st.success('Done! Data is updated each weekday at 2pm. Very hacky/basic code available at [https://github.com/nowaycomputer/scotvid](https://github.com/nowaycomputer/scotvid)')
+    data=make_plots()
+
+    with st.expander('View Data'):
+        st.write(data)
+
+st.success('Data is updated each weekday at 2pm. Very hacky/basic code available at [https://github.com/nowaycomputer/scotvid](https://github.com/nowaycomputer/scotvid) and latest merged data available as a [.csv](https://github.com/nowaycomputer/scotvid/blob/main/merged_data.csv)')
