@@ -173,3 +173,5 @@ def make_plots():
     axes.set_xlim(x_min, x_max+2)
 
     st.pyplot(fig)
+
+make_plots()
