@@ -106,7 +106,7 @@ def make_plots():
     #     xaxis_range = [ df_cases.iloc[-RANGE:-1].index[0].date().strftime('%d-%m-%Y'), (df_cases.iloc[-RANGE:-1].index[-1].date()+pd.Timedelta(days=7)).strftime('%d-%m-%Y') ] 
     # )
 
-    fig.update_layout(height=600, width=1000, margin=dict(l=60, r=60, t=60, b=60))
+    fig.update_layout(height=600, width=1000,   margin=dict(l=60, r=60, t=60, b=60))
     fig.update_layout(showlegend=False)
     # fig.show()
 
@@ -122,3 +122,5 @@ with st.spinner('Grabbing latest data...'):
         st.write(data)
 
 st.success('Data is updated each weekday at 2pm. Very hacky/basic code available at [https://github.com/nowaycomputer/scotvid](https://github.com/nowaycomputer/scotvid) and latest merged data available as a [.csv](https://github.com/nowaycomputer/scotvid/blob/main/merged_data.csv)')
+
+st.info('hello')
