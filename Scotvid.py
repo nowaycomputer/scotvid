@@ -45,7 +45,7 @@ def make_plots():
 
     
     st.title('Scotland Covid Update')
-    st.header('(Data up to '+df_cases.index[-1].strftime("%d/%m/%Y")+")")
+    st.write('(Data up to '+df_cases.index[-1].strftime("%d/%m/%Y")+")")
     
     
     specs=[[{"secondary_y": False}, {"secondary_y": False},{"secondary_y": False}], 
@@ -102,8 +102,8 @@ def make_plots():
     fig['layout']['yaxis5']['title']='ICU Rate (%)'
     fig['layout']['yaxis6']['title']='Deaths'
 
-    # fig.update_layout(
-    #     xaxis_range = [ df_cases.iloc[-RANGE:-1].index[0].date().strftime('%d-%m-%Y'), (df_cases.iloc[-RANGE:-1].index[-1].date()+pd.Timedelta(days=7)).strftime('%d-%m-%Y') ] 
+    # fig.update_layout([
+    #     [xaxis_range = [ df_cases.iloc[-RANGE:-1].index[0].date().strftime('%d-%m-%Y'), (df_cases.iloc[-RANGE:-1].index[-1].date()+pd.Timedelta(days=7)).strftime('%d-%m-%Y') ] 
     # )
 
     fig.update_layout(height=600, width=1400,   margin=dict(l=60, r=60, t=60, b=60))
@@ -139,5 +139,6 @@ st.success("""
 \n\n-    Latest merged data available as a [.csv](https://github.com/nowaycomputer/scotvid/blob/main/merged_data.csv
 \n\n-    All test/case data is by sample date
 \n\n-    Hospitalisation and ICU rates are rough estimates calculated using the ratio of hospital and ICU admissions 7 and 14 days respectively after the cases by sample date
-\n\n-    All data is source from the [PHS OpenData Service](https://www.opendata.nhs.scot/dataset/covid-19-in-scotland)
+\n\n-    Not all data is synchronised to the same date and the most recent day isn't shown because it is always significantly incomplete
+\n\n-    All data is sourced from the [PHS OpenData Service](https://www.opendata.nhs.scot/dataset/covid-19-in-scotland)
 """)
