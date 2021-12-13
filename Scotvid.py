@@ -2,8 +2,7 @@ import pandas as pd
 from plotly.subplots import make_subplots
 import numpy as np
 import streamlit as st
-import plotly.io as pio
-import plotly.graph_objects as go
+
 
 RANGE=120
 HOSPITAL_OFFSET=7
@@ -18,14 +17,14 @@ def get_remote_data():
     df_cases=pd.read_csv('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/287fc645-4352-4477-9c8c-55bc054b7e76/download/daily_cuml_scot_20211210.csv', index_col='Date',parse_dates=True)
     df_hospital=pd.read_csv('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/2dd8534b-0a6f-4744-9253-9565d62f96c2/download/trend_hb_20211210.csv', index_col='Date',parse_dates=True)
 
-    df_cases.to_csv('df_cases.csv')
-    df_hospital.to_csv('df_hospital.csv')
+    df_cases.to_csv('data/df_cases.csv')
+    df_hospital.to_csv('data/df_hospital.csv')
 
     return df_cases, df_hospital
 
 def get_local_data():
-    df_cases=pd.read_csv('df_cases.csv', index_col='Date',parse_dates=True)
-    df_hospital=pd.read_csv('df_hospital.csv', index_col='Date',parse_dates=True)
+    df_cases=pd.read_csv('data/df_cases.csv', index_col='Date',parse_dates=True)
+    df_hospital=pd.read_csv('data/df_hospital.csv', index_col='Date',parse_dates=True)
 
     return df_cases, df_hospital
 
@@ -111,7 +110,7 @@ def make_plots(location='Scotland'):
 
     st.plotly_chart(fig)
     data=pd.merge(df_hospital, df_cases, left_index=True, right_index=True)
-    data.to_csv('merged_data.csv')
+    data.to_csv('data/merged_data.csv')
     return data
 
 def get_remote_city_data():
@@ -119,7 +118,7 @@ def get_remote_city_data():
     return df_city
 
 def get_local_city_data():
-    df_city=pd.read_csv('df_city.csv', index_col='Date',parse_dates=True)
+    df_city=pd.read_csv('data/df_city.csv', index_col='Date',parse_dates=True)
 
 @st.cache(ttl=3600,suppress_st_warning=True, show_spinner=False)
 def get_city_data():
