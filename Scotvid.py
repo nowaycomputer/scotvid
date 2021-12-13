@@ -28,7 +28,7 @@ def get_local_data():
 
     return df_cases, df_hospital
 
-# @st.cache(suppress_st_warning=True, show_spinner=False)
+@st.cache(ttl=3600,suppress_st_warning=True, show_spinner=False)
 def get_data():
     try:
         df_cases, df_hospital = get_remote_data()
@@ -106,7 +106,7 @@ def make_plots():
     #     xaxis_range = [ df_cases.iloc[-RANGE:-1].index[0].date().strftime('%d-%m-%Y'), (df_cases.iloc[-RANGE:-1].index[-1].date()+pd.Timedelta(days=7)).strftime('%d-%m-%Y') ] 
     # )
 
-    fig.update_layout(height=600, width=1000,   margin=dict(l=60, r=60, t=60, b=60))
+    fig.update_layout(height=600, width=1400,   margin=dict(l=60, r=60, t=60, b=60))
     fig.update_layout(showlegend=False)
     # fig.show()
 
@@ -117,10 +117,27 @@ def make_plots():
 
 with st.spinner('Grabbing latest data...'):
     data=make_plots()
+    # st.header('TLDR')
+    # st.write("""
+    # -   Cases: 
+    # -   Positive Test Rate:
+    # -   Hospital Admissions:
+    # -   Hospitalisation Rate:
+    # -   ICU Rate:
+    # -   Deaths: 
+    # """)
+    # st.info('- <b>Cases</b>'
+    # +'\n\n- Positive Test Rate: '+str(np.round(data['PositivePercentage'].iloc[-RANGE:-1].rolling(window=7).mean()[-3],2))+'%'+' (Last week: '+str(np.round(data['PositivePercentage'].iloc[-RANGE:-8].rolling(window=7).mean()[-1],2))+'%'+')'
+    # +'\n\n')
 
     with st.expander('View Data'):
         st.write(data)
 
-st.success('Data is updated each weekday at 2pm. Very hacky/basic code available at [https://github.com/nowaycomputer/scotvid](https://github.com/nowaycomputer/scotvid) and latest merged data available as a [.csv](https://github.com/nowaycomputer/scotvid/blob/main/merged_data.csv)')
-
-st.info('hello')
+st.subheader('Notes')
+st.success("""
+-   Data is updated each weekday at 2pm. Very hacky/basic code available at [https://github.com/nowaycomputer/scotvid](https://github.com/nowaycomputer/scotvid)
+\n\n-    Latest merged data available as a [.csv](https://github.com/nowaycomputer/scotvid/blob/main/merged_data.csv
+\n\n-    All test/case data is by sample date
+\n\n-    Hospitalisation and ICU rates are rough estimates calculated using the ratio of hospital and ICU admissions 7 and 14 days respectively after the cases by sample date
+\n\n-    All data is source from the [PHS OpenData Service](https://www.opendata.nhs.scot/dataset/covid-19-in-scotland)
+""")
