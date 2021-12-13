@@ -2,12 +2,15 @@ import pandas as pd
 from plotly.subplots import make_subplots
 import numpy as np
 import streamlit as st
+import plotly.io as pio
+import plotly.graph_objects as go
 
 RANGE=120
 HOSPITAL_OFFSET=7
 ICU_OFFSET=14
 FONT_SIZE=12
 DEATH_DELAY=3
+TEMPLATE='seaborn'
 
 st.set_page_config(layout="wide")
 
@@ -51,7 +54,6 @@ def make_plots():
     specs=[[{"secondary_y": False}, {"secondary_y": False},{"secondary_y": False}], 
                            [{"secondary_y": False}, {"secondary_y": False},{"secondary_y": False}]
                            ]
-
 
     fig = make_subplots(rows=2,cols=3,specs=specs, subplot_titles=['Cases','Positive Test Rate','Hospitalisations','Hospitalisation Rate', 'ICU Rate', 'Deaths'],vertical_spacing = 0.15,horizontal_spacing = 0.1)
 
@@ -108,6 +110,9 @@ def make_plots():
 
     fig.update_layout(height=600, width=1400,   margin=dict(l=60, r=60, t=60, b=60))
     fig.update_layout(showlegend=False)
+    fig.update_xaxes(range = [df_cases.iloc[-RANGE:-1].index[0], (df_cases.iloc[-RANGE:-1].index[-1].date()+pd.Timedelta(days=7))])
+
+    # fig.layout.template = TEMPLATE
     # fig.show()
 
     st.plotly_chart(fig)
@@ -136,7 +141,7 @@ with st.spinner('Grabbing latest data...'):
 st.subheader('Notes')
 st.success("""
 -   Data is updated each weekday at 2pm. Very hacky/basic code available at [https://github.com/nowaycomputer/scotvid](https://github.com/nowaycomputer/scotvid)
-\n\n-    Latest merged data available as a [.csv](https://github.com/nowaycomputer/scotvid/blob/main/merged_data.csv
+\n\n-    Latest merged data available as a [.csv](https://github.com/nowaycomputer/scotvid/blob/main/merged_data.csv)
 \n\n-    All test/case data is by sample date
 \n\n-    Hospitalisation and ICU rates are rough estimates calculated using the ratio of hospital and ICU admissions 7 and 14 days respectively after the cases by sample date
 \n\n-    Not all data is synchronised to the same date and the most recent day isn't shown because it is always significantly incomplete
