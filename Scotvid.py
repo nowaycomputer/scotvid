@@ -46,11 +46,11 @@ def make_plots():
     df_cases, df_hospital, gov_uk_hospital_scot = get_data()
     
     st.title('Scotland Covid Update')
-    st.write('(Data up to '+df_cases.index[-1].strftime("%d/%m/%Y")+")")
-
+    c, b = st.columns([5,1])
+    c.info('Updated on '+(df_cases.index[-1]+pd.Timedelta(days=1, hours=14)).strftime("%d/%m/%Y %H:%M:%S"))
     global RANGE
     col, buff1, buff2, buff3 = st.columns([1,1,1,1])
-    range_option=col.selectbox('Timescale',['Recent','All'])
+    range_option=col.selectbox('',['Recent','All'])
     if range_option=='Recent':
         RANGE=120
     else:
@@ -60,7 +60,7 @@ def make_plots():
                            [{"secondary_y": False}, {"secondary_y": False},{"secondary_y": False}]
                            ]
 
-    fig = make_subplots(rows=2,cols=3,specs=specs,shared_xaxes=True,subplot_titles=['Cases','Positive Test Rate','Hospital','Hospitalisation Rate', 'ICU Rate', 'Deaths'],vertical_spacing = 0.15,horizontal_spacing = 0.1)
+    fig = make_subplots(rows=2,cols=3,specs=specs,shared_xaxes='all',subplot_titles=['Cases','Positive Test Rate','Hospital','Hospitalisation Rate', 'ICU Rate', 'Deaths'],vertical_spacing = 0.15,horizontal_spacing = 0.1)
 
     #
     # Cases
@@ -118,6 +118,7 @@ def make_plots():
     fig['layout']['yaxis7']['title']='ICU Rate (%)'
     fig['layout']['yaxis8']['title']='Deaths'
 
+
     fig.update_layout(height=600, width=1400,   margin=dict(l=60, r=60, t=60, b=60))
     fig.update_layout(showlegend=False)
     fig.update_xaxes(range = [df_cases.iloc[-RANGE:-1].index[0], (df_cases.iloc[-RANGE:-1].index[-1].date()+pd.Timedelta(days=7))])
@@ -153,9 +154,9 @@ with st.spinner('Grabbing latest data...'):
     # city_option = st.selectbox('Local Cases',(sorted(city_data['CAName'].unique().tolist())),index=14)
     
     col1, buff4, buff5, buff6 = st.columns([1,1,1,1])
-    city_option=col1.selectbox('Local Cases',(sorted(city_data['CAName'].unique().tolist())),index=14)
+    city_option=col1.selectbox('',(sorted(city_data['CAName'].unique().tolist())),index=14)
 
-    fig_city = make_subplots(rows=1,cols=3,shared_xaxes=True,subplot_titles=['Cases per Day in '+city_option,'Positive Test Rate in '+city_option,'Deaths in '+city_option])
+    fig_city = make_subplots(rows=1,cols=3,shared_xaxes='all',subplot_titles=['Cases per Day in '+city_option,'Positive Test Rate in '+city_option,'Deaths in '+city_option])
     fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['DailyPositive'].iloc[-RANGE:-1].index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-1]['DailyPositive'], mode='lines',name='Cases',line_color='blue',opacity=0.25,row=1,col=1)
     fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['DailyPositive'].iloc[-RANGE:-1].rolling(window=7).mean().index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-1]['DailyPositive'].rolling(window=7).mean(), mode='lines',name='Cases (Ave)',line_color='blue',line_width=3,row=1,col=1)
     
