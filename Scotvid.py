@@ -3,13 +3,11 @@ from plotly.subplots import make_subplots
 import numpy as np
 import streamlit as st
 
-
 RANGE=120
 HOSPITAL_OFFSET=7
 ICU_OFFSET=14
 FONT_SIZE=12
 DEATH_DELAY=3
-TEMPLATE='seaborn'
 
 st.set_page_config(layout="wide")
 
@@ -18,7 +16,6 @@ def get_remote_data():
     df_hospital=pd.read_csv('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/2dd8534b-0a6f-4744-9253-9565d62f96c2/download/trend_hb_20211210.csv', index_col='Date',parse_dates=True)
     gov_uk_hospital_scot=pd.read_csv('https://coronavirus.data.gov.uk/api/v1/data?filters=areaType=nation;areaName=Scotland&structure=%7B%22areaType%22:%22areaType%22,%22areaName%22:%22areaName%22,%22areaCode%22:%22areaCode%22,%22date%22:%22date%22,%22hospitalCases%22:%22hospitalCases%22%7D&format=csv',index_col='date',parse_dates=True)
     df_hospital=df_hospital[df_hospital['HBName']=='Scotland']
-    # df_hospital=pd.concat([gov_uk_hospital_scot['hospitalCases'],df_hospital[['DailyDeaths','HospitalAdmissions','PositivePercentage','ICUAdmissions']]],axis=1).plot()
 
     df_cases.to_csv('data/df_cases.csv')
     df_hospital.to_csv('data/df_hospital.csv')
@@ -30,7 +27,6 @@ def get_local_data():
     df_hospital=pd.read_csv('data/df_hospital.csv', index_col='Date',parse_dates=True)
     gov_uk_hospital_scot=pd.read_csv('data/gov_uk_hospital_scot.csv', index_col='date',parse_dates=True)
     df_hospital=df_hospital[df_hospital['HBName']=='Scotland']
-    # df_hospital=pd.concat([gov_uk_hospital_scot['hospitalCases'],df_hospital[['DailyDeaths','HospitalAdmissions','PositivePercentage','ICUAdmissions']]],axis=1).plot()
 
     return df_cases, df_hospital, gov_uk_hospital_scot
 
@@ -62,22 +58,22 @@ def make_plots():
     #
     # Cases
     #
-    fig.add_scatter(x=df_cases.iloc[-RANGE:-1].index, y=df_cases['DailyCases'].iloc[-RANGE:-1], mode='lines',name='Cases',line_color='blue',opacity=0.25,row=1,col=1)
-    fig.add_scatter(x=df_cases.iloc[-RANGE:-1].rolling(window=7).mean().index, y=df_cases['DailyCases'].iloc[-RANGE:-1].rolling(window=7).mean(), mode='lines',name='Cases (Ave)',line_color='blue',line_width=3,row=1,col=1)
+    fig.add_scatter(x=df_cases.iloc[-2*RANGE:-1].index, y=df_cases['DailyCases'].iloc[-2*RANGE:-1], mode='lines',name='Cases',line_color='blue',opacity=0.25,row=1,col=1)
+    fig.add_scatter(x=df_cases.iloc[-2*RANGE:-1].rolling(window=7).mean().index, y=df_cases['DailyCases'].iloc[-2*RANGE:-1].rolling(window=7).mean(), mode='lines',name='Cases (Ave)',line_color='blue',line_width=3,row=1,col=1)
 
     #
     # Pos Rate
     #
 
-    fig.add_scatter(x=df_hospital.iloc[-RANGE:-1].index, y=df_hospital['PositivePercentage'].iloc[-RANGE:-1], mode='lines',name='Pos Rate (Ave)',line_color='green',opacity=0.25,row=1,col=2)
-    fig.add_scatter(x=df_hospital.iloc[-RANGE:-1].rolling(window=7).mean().index, y=df_hospital['PositivePercentage'].iloc[-RANGE:-1].rolling(window=7).mean(), mode='lines',name='Pos Rate (Ave)',line_color='green',line_width=3,row=1,col=2)
+    fig.add_scatter(x=df_hospital.iloc[-2*RANGE:-1].index, y=df_hospital['PositivePercentage'].iloc[-2*RANGE:-1], mode='lines',name='Pos Rate (Ave)',line_color='green',opacity=0.25,row=1,col=2)
+    fig.add_scatter(x=df_hospital.iloc[-2*RANGE:-1].rolling(window=7).mean().index, y=df_hospital['PositivePercentage'].iloc[-2*RANGE:-1].rolling(window=7).mean(), mode='lines',name='Pos Rate (Ave)',line_color='green',line_width=3,row=1,col=2)
 
     #
     # Hospital Admissions
     #
-    fig.add_scatter(x=df_hospital.iloc[-RANGE:-1].index, y=df_hospital['HospitalAdmissions'].iloc[-RANGE:-1], mode='lines',name='Admissions',line_color='red',opacity=0.25,row=1,col=3)
-    fig.add_scatter(x=df_hospital.iloc[-RANGE:-1].rolling(window=7).mean().index, y=df_hospital['HospitalAdmissions'].iloc[-RANGE:-1].rolling(window=7).mean(), mode='lines',name='Admissions (Ave)',line_color='red',line_width=3,row=1,col=3)
-    
+    fig.add_scatter(x=df_hospital.iloc[-2*RANGE:-1].index, y=df_hospital['HospitalAdmissions'].iloc[-2*RANGE:-1], mode='lines',name='Admissions',line_color='red',opacity=0.25,row=1,col=3)
+    fig.add_scatter(x=df_hospital.iloc[-2*RANGE:-1].rolling(window=7).mean().index, y=df_hospital['HospitalAdmissions'].iloc[-2*RANGE:-1].rolling(window=7).mean(), mode='lines',name='Admissions (Ave)',line_color='red',line_width=3,row=1,col=3)
+    # Hospital Patients
     fig.add_scatter(x=gov_uk_hospital_scot.index, y=gov_uk_hospital_scot['hospitalCases'], mode='lines',name='In Hospital',line_color='navy',row=1,col=3,secondary_y=True, line_width=3)
     
     #
@@ -91,15 +87,15 @@ def make_plots():
     # ICU Rate
     #
 
-    fig.add_scatter(x=df_hospital['ICUAdmissions'].iloc[-RANGE:-1].index, y=((df_hospital['ICUAdmissions'].iloc[-RANGE:-1]/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100), mode='lines',name='ICU Rate',line_color='brown',opacity=0.25,row=2,col=2)
-    fig.add_scatter(x=df_hospital['ICUAdmissions'].iloc[-RANGE:-1].index, y=((df_hospital['ICUAdmissions'].iloc[-RANGE:-1]/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100).rolling(window=7).mean(), mode='lines',name='ICU Rate (Ave)',line_color='brown',line_width=3,row=2,col=2)
+    fig.add_scatter(x=df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].index, y=((df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1]/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100), mode='lines',name='ICU Rate',line_color='brown',opacity=0.25,row=2,col=2)
+    fig.add_scatter(x=df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].index, y=((df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1]/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100).rolling(window=7).mean(), mode='lines',name='ICU Rate (Ave)',line_color='brown',line_width=3,row=2,col=2)
 
     #
     # Deaths
     #
 
-    fig.add_scatter(x=df_hospital['DailyDeaths'].iloc[-RANGE:-DEATH_DELAY].index, y=df_hospital['DailyDeaths'].iloc[-RANGE:-DEATH_DELAY], mode='lines',name='Deaths',line_color='black',opacity=0.25,row=2,col=3)
-    fig.add_scatter(x=df_hospital['DailyDeaths'].iloc[-RANGE:-DEATH_DELAY].index, y=df_hospital['DailyDeaths'].iloc[-RANGE:-DEATH_DELAY].rolling(window=7).mean(), mode='lines',name='Deaths (Ave)',line_color='black',line_width=3,row=2,col=3)
+    fig.add_scatter(x=df_hospital['DailyDeaths'].iloc[-2*RANGE:-DEATH_DELAY].index, y=df_hospital['DailyDeaths'].iloc[-2*RANGE:-DEATH_DELAY], mode='lines',name='Deaths',line_color='black',opacity=0.25,row=2,col=3)
+    fig.add_scatter(x=df_hospital['DailyDeaths'].iloc[-2*RANGE:-DEATH_DELAY].index, y=df_hospital['DailyDeaths'].iloc[-2*RANGE:-DEATH_DELAY].rolling(window=7).mean(), mode='lines',name='Deaths (Ave)',line_color='black',line_width=3,row=2,col=3)
 
     fig['layout']['yaxis']['title']='Cases/Day'
     fig['layout']['yaxis2']['title']='Positive Test Rate (%)'
@@ -115,9 +111,6 @@ def make_plots():
     fig.update_layout(showlegend=False)
     fig.update_xaxes(range = [df_cases.iloc[-RANGE:-1].index[0], (df_cases.iloc[-RANGE:-1].index[-1].date()+pd.Timedelta(days=7))])
 
-    # fig.layout.template = TEMPLATE
-    # fig.show()
-
     st.plotly_chart(fig)
     data=pd.merge(df_hospital, df_cases, left_index=True, right_index=True)
     data.to_csv('data/merged_data.csv')
@@ -125,6 +118,7 @@ def make_plots():
 
 def get_remote_city_data():
     df_city=pd.read_csv('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/427f9a25-db22-4014-a3bc-893b68243055/download/trend_ca_20211213.csv', index_col='Date',parse_dates=True)
+    df_city.to_csv('data/df_city.csv')
     return df_city
 
 def get_local_city_data():
@@ -179,7 +173,7 @@ with st.spinner('Grabbing latest data...'):
         st.write(data)
     
     with st.expander('View Local Data'):
-        st.write(city_data)
+        st.write(city_data[city_data['CAName']==city_option])
 
 st.subheader('Notes')
 st.success("""
