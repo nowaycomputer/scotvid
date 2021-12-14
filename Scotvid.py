@@ -140,20 +140,23 @@ with st.spinner('Grabbing latest data...'):
     st.subheader('Local Data')
     city_option = st.selectbox('Local Cases',(sorted(city_data['CAName'].unique().tolist())),index=14)
     
-    fig_city = make_subplots(rows=2,cols=1,subplot_titles=['Cases per Day in '+city_option,'Positive Test Rate in '+city_option])
+    fig_city = make_subplots(rows=1,cols=3,subplot_titles=['Cases per Day in '+city_option,'Positive Test Rate in '+city_option,'Deaths in '+city_option])
     fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['DailyPositive'].iloc[-RANGE:-1].index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-1]['DailyPositive'], mode='lines',name='Cases',line_color='blue',opacity=0.25,row=1,col=1)
     fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['DailyPositive'].iloc[-RANGE:-1].rolling(window=7).mean().index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-1]['DailyPositive'].rolling(window=7).mean(), mode='lines',name='Cases (Ave)',line_color='blue',line_width=3,row=1,col=1)
     
-    fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['PositivePercentage'].iloc[-RANGE:-1].index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-1]['PositivePercentage'], mode='lines',name='Pos Rate',line_color='red',opacity=0.25,row=2,col=1)
-    fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['PositivePercentage'].iloc[-RANGE:-1].rolling(window=7).mean().index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-1]['PositivePercentage'].rolling(window=7).mean(), mode='lines',name='Pos Rate (Ave)',line_color='red',line_width=3,row=2,col=1)
+    fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['PositivePercentage'].iloc[-RANGE:-1].index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-1]['PositivePercentage'], mode='lines',name='Pos Rate',line_color='green',opacity=0.25,row=1,col=2)
+    fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['PositivePercentage'].iloc[-RANGE:-1].rolling(window=7).mean().index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-1]['PositivePercentage'].rolling(window=7).mean(), mode='lines',name='Pos Rate (Ave)',line_color='green',line_width=3,row=1,col=2)
 
+    fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['DailyDeaths'].iloc[-RANGE:-1].index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-1]['DailyDeaths'], mode='lines',name='Deaths',line_color='black',opacity=0.25,row=1,col=3)
+    fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['DailyDeaths'].iloc[-RANGE:-1].rolling(window=7).mean().index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-1]['DailyDeaths'].rolling(window=7).mean(), mode='lines',name='Deaths (Ave)',line_color='black',line_width=3,row=1,col=3)
 
     fig_city.update_layout(showlegend=False)
-    fig_city.update_layout(height=600, width=1400,   margin=dict(l=60, r=60, t=60, b=60))
+    fig_city.update_layout(height=400, width=1400,   margin=dict(l=60, r=60, t=60, b=60))
     fig_city.update_xaxes(range = [city_data[city_data['CAName']==city_option].iloc[-RANGE:-1].index[0], (city_data[city_data['CAName']==city_option].iloc[-RANGE:-1].index[-1].date()+pd.Timedelta(days=7))])
 
     fig_city['layout']['yaxis']['title']='Cases/Day'
-    fig_city['layout']['yaxis2']['title']='Positive Test Rate (%)'
+    fig_city['layout']['yaxis2']['title']='Daily Positive Test Rate (%)'
+    fig_city['layout']['yaxis3']['title']='Deaths/Day'
 
     st.plotly_chart(fig_city)
 
