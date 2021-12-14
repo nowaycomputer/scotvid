@@ -123,6 +123,7 @@ def get_remote_city_data():
 
 def get_local_city_data():
     df_city=pd.read_csv('data/df_city.csv', index_col='Date',parse_dates=True)
+    return df_city
 
 @st.cache(ttl=3600,suppress_st_warning=True, show_spinner=False)
 def get_city_data():
