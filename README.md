@@ -1,9 +1,8 @@
 ## Scotvid
 
-Some basic plotting of the latest Scotland COVID-19 Data.
+[Streamlit](https://streamlit.io/) based visualisations of the latest Scotland COVID-19 Data.
 
-An interface is available [here](https://share.streamlit.io/nowaycomputer/scotvid/main/Scotvid.py)
-
+A demo interface is available [here](https://share.streamlit.io/nowaycomputer/scotvid/main/Scotvid.py)
 
 ![alt text](img/scotvid.png)
 
