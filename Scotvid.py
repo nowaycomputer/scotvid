@@ -47,10 +47,14 @@ def make_plots():
     df_cases, df_hospital, gov_uk_hospital_scot = get_data()
     st.title('Scotland Covid Update')
     # b,c = st.columns([1,5])
-    col, buff, buff2 = st.columns([1,10,10])
+    col, buff, buff2 = st.columns(3)
+    buff.write('')
     col.info('Updated on '+(df_cases.index[-1]+pd.Timedelta(days=1, hours=14)).strftime("%d/%m/%Y %H:%M:%S"))
     global RANGE
-    col, buff1, buff2, buff3 = st.columns([1,1,1,1])
+    col, buff1, buff2, buff3 = st.columns(4)
+    buff1.write('')
+    buff2.write('')
+    buff3.write('')
     range_option=col.selectbox('',['Recent','All'])
     if range_option=='Recent':
         RANGE=121
@@ -72,10 +76,10 @@ def make_plots():
     death_diff=hosp_ma_no_na['DailyDeaths'].iloc[-1]-hosp_ma_no_na['DailyDeaths'].iloc[-8]
     
     case_box.metric(label="Daily Cases (vs last wk)", value=str(int(cases_ma.iloc[-1].values[0])), delta=str(int(case_diff)),delta_color="inverse")
-    pos_box.metric(label="Daily Positive Rate (vs last wk)", value=str(np.round(hosp_ma['PositivePercentage'].iloc[-1],0))+"%", delta=str(np.round(pos_diff,0)),delta_color="inverse")
+    pos_box.metric(label="Daily Positive Rate (vs last wk)", value=str(np.round(hosp_ma['PositivePercentage'].iloc[-1],1))+"%", delta=str(np.round(pos_diff,1))+"%",delta_color="inverse")
     adm_box.metric(label="Daily Admissions (vs last wk)",value=str(int(np.round(hosp_ma_no_na['HospitalAdmissions'].iloc[-1],0))), delta=str(int(np.round(adm_diff,0))),delta_color="inverse")
     icu_box.metric(label="Daily ICU Admissions (vs last wk)",value=str(int(np.round(hosp_ma_no_na['ICUAdmissions'].iloc[-1],0))), delta=str(int(np.round(icu_diff,0))),delta_color="inverse")
-    death_box.metric(label="Daily Deaths (vs last wk)",value=str(int(np.round(hosp_ma_no_na['DailyDeaths'].iloc[-1],0))), delta=str(int(np.round(death_diff,0))),delta_color="inverse")
+    death_box.metric(label="Daily Deaths (vs last wk)",value=str(int(np.round(hosp_ma_no_na['DailyDeaths'].iloc[-1],0))), delta=str(int(np.round(death_diff,1))),delta_color="inverse")
 
     specs=[[{"secondary_y": False}, {"secondary_y": True},{"secondary_y": True}], 
                            [{"secondary_y": False}, {"secondary_y": False},{"secondary_y": False}]
@@ -175,7 +179,10 @@ with st.spinner('Grabbing latest data...'):
     st.subheader('Local Data')
     # city_option = st.selectbox('Local Cases',(sorted(city_data['CAName'].unique().tolist())),index=14)
     
-    col1, buff4, buff5, buff6 = st.columns([1,5,5,5])
+    col1, buff4, buff5, buff6 = st.columns(4)
+    buff4.write('')
+    buff5.write('')
+    buff6.write('')
     city_option=col1.selectbox('',(sorted(city_data['CAName'].unique().tolist())),index=14)
 
     fig_city = make_subplots(rows=1,cols=3,shared_xaxes='all',subplot_titles=['Cases per Day in '+city_option,'Positive Test Rate in '+city_option,'Deaths in '+city_option])
