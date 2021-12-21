@@ -8,6 +8,7 @@ HOSPITAL_OFFSET=7
 ICU_OFFSET=14
 FONT_SIZE=12
 DEATH_DELAY=3
+TEMPLATE='none'
 
 st.set_page_config(layout="wide")
 
@@ -46,13 +47,14 @@ def make_plots():
     df_cases, df_hospital, gov_uk_hospital_scot = get_data()
     
     st.title('Scotland Covid Update')
-    c, b = st.columns([5,1])
-    c.info('Updated on '+(df_cases.index[-1]+pd.Timedelta(days=1, hours=14)).strftime("%d/%m/%Y %H:%M:%S"))
+    # b,c = st.columns([1,5])
+    col, buff, buff2 = st.columns([1,10,10])
+    col.info('Updated on '+(df_cases.index[-1]+pd.Timedelta(days=1, hours=14)).strftime("%d/%m/%Y %H:%M:%S"))
     global RANGE
     col, buff1, buff2, buff3 = st.columns([1,1,1,1])
     range_option=col.selectbox('',['Recent','All'])
     if range_option=='Recent':
-        RANGE=120
+        RANGE=121
     else:
         RANGE=-1
     st.subheader('National Data')
@@ -117,12 +119,13 @@ def make_plots():
     fig['layout']['yaxis6']['title']='Hospitalisation Rate (%)'
     fig['layout']['yaxis7']['title']='ICU Rate (%)'
     fig['layout']['yaxis8']['title']='Deaths'
+    fig['layout']['plot_bgcolor']='rgba(0,0,0,0)'
 
 
     fig.update_layout(height=600, width=1400,   margin=dict(l=60, r=60, t=60, b=60))
     fig.update_layout(showlegend=False)
     fig.update_xaxes(range = [df_cases.iloc[-RANGE:-1].index[0], (df_cases.iloc[-RANGE:-1].index[-1].date()+pd.Timedelta(days=7))])
-
+    fig.update_layout(template=TEMPLATE)
     st.plotly_chart(fig)
     data=pd.merge(df_hospital, df_cases, left_index=True, right_index=True)
     data.to_csv('data/merged_data.csv')
@@ -153,7 +156,7 @@ with st.spinner('Grabbing latest data...'):
     st.subheader('Local Data')
     # city_option = st.selectbox('Local Cases',(sorted(city_data['CAName'].unique().tolist())),index=14)
     
-    col1, buff4, buff5, buff6 = st.columns([1,1,1,1])
+    col1, buff4, buff5, buff6 = st.columns([1,5,5,5])
     city_option=col1.selectbox('',(sorted(city_data['CAName'].unique().tolist())),index=14)
 
     fig_city = make_subplots(rows=1,cols=3,shared_xaxes='all',subplot_titles=['Cases per Day in '+city_option,'Positive Test Rate in '+city_option,'Deaths in '+city_option])
@@ -173,6 +176,9 @@ with st.spinner('Grabbing latest data...'):
     fig_city['layout']['yaxis']['title']='Cases/Day'
     fig_city['layout']['yaxis2']['title']='Daily Positive Test Rate (%)'
     fig_city['layout']['yaxis3']['title']='Deaths/Day'
+    
+    fig_city.update_layout(template=TEMPLATE)
+    fig_city['layout']['plot_bgcolor']='rgba(0,0,0,0)'
 
     st.plotly_chart(fig_city)
 
@@ -190,10 +196,12 @@ with st.spinner('Grabbing latest data...'):
     # +'\n\n')
 
     with st.expander('View National Data'):
-        st.write(data)
+        st.dataframe(data[['DailyPositive','CumulativePositive','DailyDeaths','CumulativeDeaths','TotalTests',
+                           'PositivePercentage','HospitalAdmissions','ICUAdmissions']])
     
     with st.expander('View Local Data'):
-        st.write(city_data[city_data['CAName']==city_option])
+        st.dataframe(city_data[city_data['CAName']==city_option][['DailyPositive','CumulativePositive','DailyDeaths','CumulativeDeaths','TotalTests',
+                           'PositivePercentage']])
 
 st.subheader('Notes')
 st.success("""
