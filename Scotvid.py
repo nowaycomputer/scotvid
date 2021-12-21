@@ -45,7 +45,6 @@ def get_data():
 def make_plots():
 
     df_cases, df_hospital, gov_uk_hospital_scot = get_data()
-    
     st.title('Scotland Covid Update')
     # b,c = st.columns([1,5])
     col, buff, buff2 = st.columns([1,10,10])
@@ -58,6 +57,26 @@ def make_plots():
     else:
         RANGE=-1
     st.subheader('National Data')
+    
+    cases_ma=df_cases.iloc[-2*RANGE:-1].rolling(window=7).mean()
+    hosp_ma=df_hospital.iloc[-2*RANGE:-1].rolling(window=7).mean()
+    hosp_ma_no_na=hosp_ma.dropna()
+    hosp_occ_ma=gov_uk_hospital_scot.rolling(window=7).mean()
+    
+    case_box,pos_box,adm_box,icu_box, death_box=st.columns([1,1,1,1,1])
+    
+    case_diff=cases_ma.iloc[-1].values[0]-cases_ma.iloc[-8].values[0]
+    pos_diff=hosp_ma['PositivePercentage'].iloc[-1]-hosp_ma['PositivePercentage'].iloc[-8]
+    adm_diff=hosp_ma_no_na['HospitalAdmissions'].iloc[-1]-hosp_ma_no_na['HospitalAdmissions'].iloc[-8]
+    icu_diff=hosp_ma_no_na['ICUAdmissions'].iloc[-1]-hosp_ma_no_na['ICUAdmissions'].iloc[-8]
+    death_diff=hosp_ma_no_na['DailyDeaths'].iloc[-1]-hosp_ma_no_na['DailyDeaths'].iloc[-8]
+    
+    case_box.metric(label="Daily Cases (vs last wk)", value=str(int(cases_ma.iloc[-1].values[0])), delta=str(int(case_diff)),delta_color="inverse")
+    pos_box.metric(label="Daily Positive Rate (vs last wk)", value=str(np.round(hosp_ma['PositivePercentage'].iloc[-1],0))+"%", delta=str(np.round(pos_diff,0)),delta_color="inverse")
+    adm_box.metric(label="Daily Admissions (vs last wk)",value=str(int(np.round(hosp_ma_no_na['HospitalAdmissions'].iloc[-1],0))), delta=str(int(np.round(adm_diff,0))),delta_color="inverse")
+    icu_box.metric(label="Daily ICU Admissions (vs last wk)",value=str(int(np.round(hosp_ma_no_na['ICUAdmissions'].iloc[-1],0))), delta=str(int(np.round(icu_diff,0))),delta_color="inverse")
+    death_box.metric(label="Daily Deaths (vs last wk)",value=str(int(np.round(hosp_ma_no_na['DailyDeaths'].iloc[-1],0))), delta=str(int(np.round(death_diff,0))),delta_color="inverse")
+
     specs=[[{"secondary_y": False}, {"secondary_y": True},{"secondary_y": True}], 
                            [{"secondary_y": False}, {"secondary_y": False},{"secondary_y": False}]
                            ]
@@ -68,14 +87,14 @@ def make_plots():
     # Cases
     #
     fig.add_scatter(x=df_cases.iloc[-2*RANGE:-1].index, y=df_cases['DailyCases'].iloc[-2*RANGE:-1], mode='lines',name='Cases',line_color='blue',opacity=0.25,row=1,col=1)
-    fig.add_scatter(x=df_cases.iloc[-2*RANGE:-1].rolling(window=7).mean().index, y=df_cases['DailyCases'].iloc[-2*RANGE:-1].rolling(window=7).mean(), mode='lines',name='Cases (Ave)',line_color='blue',line_width=3,row=1,col=1)
+    fig.add_scatter(x=cases_ma.index, y=cases_ma['DailyCases'], mode='lines',name='Cases (Ave)',line_color='blue',line_width=3,row=1,col=1)
 
     #
     # Pos Rate
     #
 
     fig.add_scatter(x=df_hospital.iloc[-2*RANGE:-1].index, y=df_hospital['PositivePercentage'].iloc[-2*RANGE:-1], mode='lines',name='Pos Rate (Ave)',line_color='green',opacity=0.25,row=1,col=2)
-    fig.add_scatter(x=df_hospital.iloc[-2*RANGE:-1].rolling(window=7).mean().index, y=df_hospital['PositivePercentage'].iloc[-2*RANGE:-1].rolling(window=7).mean(), mode='lines',name='Pos Rate (Ave)',line_color='green',line_width=3,row=1,col=2)
+    fig.add_scatter(x=hosp_ma.index, y=hosp_ma['PositivePercentage'], mode='lines',name='Pos Rate (Ave)',line_color='green',line_width=3,row=1,col=2)
     # fig.add_bar(x=df_hospital.iloc[-2*RANGE:-1].index,y=df_hospital['TotalTests'].iloc[-2*RANGE:-1],opacity=0.3,row=1,col=2,secondary_y=True,name='Tests',marker_color='orange')
 
     #
