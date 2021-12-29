@@ -120,7 +120,7 @@ def make_plots():
         fig['layout']['yaxis6'].update(range=[-0.01, 45], autorange=False)
         fig['layout']['yaxis7'].update(range=[-0.01, 45], autorange=False)
     else:
-        fig['layout']['yaxis6'].update(range=[-0.01, 10], autorange=False)
+        fig['layout']['yaxis6'].update(range=[-0.01, 6], autorange=False)
         fig['layout']['yaxis7'].update(range=[-0.01, 1], autorange=False)
     #
     # ICU Rate
