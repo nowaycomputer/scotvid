@@ -8,6 +8,7 @@ HOSPITAL_OFFSET=7
 ICU_OFFSET=14
 FONT_SIZE=12
 DEATH_DELAY=3
+ADJ=1 # hacky adjustment factor for periods when reporting delays are long
 TEMPLATE='none'
 
 st.set_page_config(layout="wide")
@@ -90,14 +91,14 @@ def make_plots():
     #
     # Cases
     #
-    fig.add_scatter(x=df_cases.iloc[-2*RANGE:-2].index, y=df_cases['DailyCases'].iloc[-2*RANGE:-1], mode='lines',name='Cases',line_color='blue',opacity=0.25,row=1,col=1)
+    fig.add_scatter(x=df_cases.iloc[-2*RANGE:-ADJ].index, y=df_cases['DailyCases'].iloc[-2*RANGE:-1], mode='lines',name='Cases',line_color='blue',opacity=0.25,row=1,col=1)
     fig.add_scatter(x=cases_ma.index, y=cases_ma['DailyCases'], mode='lines',name='Cases (Ave)',line_color='blue',line_width=3,row=1,col=1)
 
     #
     # Pos Rate
     #
 
-    fig.add_scatter(x=df_hospital.iloc[-2*RANGE:-2].index, y=df_hospital['PositivePercentage'].iloc[-2*RANGE:-1], mode='lines',name='Pos Rate',line_color='green',opacity=0.25,row=1,col=2)
+    fig.add_scatter(x=df_hospital.iloc[-2*RANGE:-ADJ].index, y=df_hospital['PositivePercentage'].iloc[-2*RANGE:-1], mode='lines',name='Pos Rate',line_color='green',opacity=0.25,row=1,col=2)
     fig.add_scatter(x=hosp_ma.index, y=hosp_ma['PositivePercentage'], mode='lines',name='Pos Rate (Ave)',line_color='green',line_width=3,row=1,col=2)
     # fig.add_bar(x=df_hospital.iloc[-2*RANGE:-1].index,y=df_hospital['TotalTests'].iloc[-2*RANGE:-1],opacity=0.3,row=1,col=2,secondary_y=True,name='Tests',marker_color='orange')
 
@@ -113,16 +114,16 @@ def make_plots():
     # Hosp Rate
     #
 
-    fig.add_scatter(x=df_hospital.iloc[-RANGE:-2-HOSPITAL_OFFSET].index, y=((df_hospital['HospitalAdmissions'].iloc[-RANGE:-1].shift(-HOSPITAL_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1])*100), mode='lines',name='Hosp. Rate',line_color='purple',opacity=0.1,row=2,col=2)
-    fig.add_scatter(x=df_hospital.iloc[-RANGE:-2-HOSPITAL_OFFSET].index, y=((df_hospital['HospitalAdmissions'].iloc[-RANGE:-1].shift(-HOSPITAL_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1])*100).rolling(window=7).mean(), mode='lines',name='Hosp. Rate (Ave)',line_color='purple',line_width=3,row=2,col=2)
+    fig.add_scatter(x=df_hospital.iloc[-RANGE:-ADJ-HOSPITAL_OFFSET].index, y=((df_hospital['HospitalAdmissions'].iloc[-RANGE:-1].shift(-HOSPITAL_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1])*100), mode='lines',name='Hosp. Rate',line_color='purple',opacity=0.1,row=2,col=2)
+    fig.add_scatter(x=df_hospital.iloc[-RANGE:-ADJ-HOSPITAL_OFFSET].index, y=((df_hospital['HospitalAdmissions'].iloc[-RANGE:-1].shift(-HOSPITAL_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1])*100).rolling(window=7).mean(), mode='lines',name='Hosp. Rate (Ave)',line_color='purple',line_width=3,row=2,col=2)
     if RANGE==-1:
             fig['layout']['yaxis6'].update(range=[-0.01, 45], autorange=False)
     #
     # ICU Rate
     #
 
-    fig.add_scatter(x=df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].index, y=((df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].shift(ICU_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100), mode='lines',name='ICU Rate',line_color='brown',opacity=0.1,row=2,col=2,secondary_y=True)
-    fig.add_scatter(x=df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].index, y=((df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].shift(ICU_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100).rolling(window=7).mean(), mode='lines',name='ICU Rate (Ave)',line_color='brown',line_width=3,row=2,col=2,secondary_y=True)
+    fig.add_scatter(x=df_hospital['ICUAdmissions'].iloc[-ADJ*RANGE:-1].index, y=((df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].shift(ICU_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100), mode='lines',name='ICU Rate',line_color='brown',opacity=0.1,row=2,col=2,secondary_y=True)
+    fig.add_scatter(x=df_hospital['ICUAdmissions'].iloc[-ADJ*RANGE:-1].index, y=((df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].shift(ICU_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100).rolling(window=7).mean(), mode='lines',name='ICU Rate (Ave)',line_color='brown',line_width=3,row=2,col=2,secondary_y=True)
     if RANGE==-1:
             fig['layout']['yaxis7'].update(range=[-0.1, 2], autorange=False)
             
