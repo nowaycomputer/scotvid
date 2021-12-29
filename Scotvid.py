@@ -81,11 +81,11 @@ def make_plots():
     icu_box.metric(label="Daily ICU Admissions (vs last wk)",value=str(int(np.round(hosp_ma_no_na['ICUAdmissions'].iloc[-1],0))), delta=str(int(np.round(icu_diff,0))),delta_color="inverse")
     death_box.metric(label="Daily Deaths (vs last wk)",value=str(int(np.round(hosp_ma_no_na['DailyDeaths'].iloc[-1],0))), delta=str(int(np.round(death_diff,1))),delta_color="inverse")
 
-    specs=[[{"secondary_y": False}, {"secondary_y": True},{"secondary_y": True}], 
-                           [{"secondary_y": False}, {"secondary_y": False},{"secondary_y": False}]
+    specs=[[{"secondary_y": False}, {"secondary_y": False},{"secondary_y": True}], 
+                           [{"secondary_y": False}, {"secondary_y": True},{"secondary_y": False}]
                            ]
 
-    fig = make_subplots(rows=2,cols=3,specs=specs,shared_xaxes='all',subplot_titles=['Cases','Positive Test Rate','Hospital','Hospitalisation Rate', 'ICU Rate', 'Deaths'],vertical_spacing = 0.15,horizontal_spacing = 0.1)
+    fig = make_subplots(rows=2,cols=3,specs=specs,shared_xaxes='all',subplot_titles=['Cases','Positive Test Rate','Hospital','ICU Admissions', 'Hospital and ICU Rates', 'Deaths'],vertical_spacing = 0.15,horizontal_spacing = 0.1)
 
     #
     # Cases
@@ -113,18 +113,25 @@ def make_plots():
     # Hosp Rate
     #
 
-    fig.add_scatter(x=df_hospital.iloc[-RANGE:-2-HOSPITAL_OFFSET].index, y=((df_hospital['HospitalAdmissions'].iloc[-RANGE:-1].shift(-HOSPITAL_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1])*100), mode='lines',name='Hosp. Rate',line_color='purple',opacity=0.25,row=2,col=1)
-    fig.add_scatter(x=df_hospital.iloc[-RANGE:-2-HOSPITAL_OFFSET].index, y=((df_hospital['HospitalAdmissions'].iloc[-RANGE:-1].shift(-HOSPITAL_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1])*100).rolling(window=7).mean(), mode='lines',name='Hosp. Rate (Ave)',line_color='purple',line_width=3,row=2,col=1)
+    fig.add_scatter(x=df_hospital.iloc[-RANGE:-2-HOSPITAL_OFFSET].index, y=((df_hospital['HospitalAdmissions'].iloc[-RANGE:-1].shift(-HOSPITAL_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1])*100), mode='lines',name='Hosp. Rate',line_color='purple',opacity=0.1,row=2,col=2)
+    fig.add_scatter(x=df_hospital.iloc[-RANGE:-2-HOSPITAL_OFFSET].index, y=((df_hospital['HospitalAdmissions'].iloc[-RANGE:-1].shift(-HOSPITAL_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1])*100).rolling(window=7).mean(), mode='lines',name='Hosp. Rate (Ave)',line_color='purple',line_width=3,row=2,col=2)
     if RANGE==-1:
             fig['layout']['yaxis6'].update(range=[-0.01, 45], autorange=False)
     #
     # ICU Rate
     #
 
-    fig.add_scatter(x=df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].index, y=((df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].shift(ICU_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100), mode='lines',name='ICU Rate',line_color='brown',opacity=0.25,row=2,col=2)
-    fig.add_scatter(x=df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].index, y=((df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].shift(ICU_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100).rolling(window=7).mean(), mode='lines',name='ICU Rate (Ave)',line_color='brown',line_width=3,row=2,col=2)
+    fig.add_scatter(x=df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].index, y=((df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].shift(ICU_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100), mode='lines',name='ICU Rate',line_color='brown',opacity=0.1,row=2,col=2,secondary_y=True)
+    fig.add_scatter(x=df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].index, y=((df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].shift(ICU_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1].shift(ICU_OFFSET))*100).rolling(window=7).mean(), mode='lines',name='ICU Rate (Ave)',line_color='brown',line_width=3,row=2,col=2,secondary_y=True)
     if RANGE==-1:
             fig['layout']['yaxis7'].update(range=[-0.1, 2], autorange=False)
+            
+    
+    # ICU Admissions
+    fig.add_scatter(x=df_hospital.iloc[-2*RANGE:-1].index, y=df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1], mode='lines',name='Admissions',line_color='red',opacity=0.25,row=2,col=1)
+    fig.add_scatter(x=df_hospital.iloc[-2*RANGE:-1].rolling(window=7).mean().index, y=df_hospital['ICUAdmissions'].iloc[-2*RANGE:-1].rolling(window=7).mean(), mode='lines',name='Admissions (Ave)',line_color='red',line_width=3,row=2,col=1)
+   
+    
     #
     # Deaths
     #
@@ -132,15 +139,27 @@ def make_plots():
     fig.add_scatter(x=df_hospital['DailyDeaths'].iloc[-2*RANGE:-DEATH_DELAY].index, y=df_hospital['DailyDeaths'].iloc[-2*RANGE:-DEATH_DELAY], mode='lines',name='Deaths',line_color='black',opacity=0.25,row=2,col=3)
     fig.add_scatter(x=df_hospital['DailyDeaths'].iloc[-2*RANGE:-DEATH_DELAY].index, y=df_hospital['DailyDeaths'].iloc[-2*RANGE:-DEATH_DELAY].rolling(window=7).mean(), mode='lines',name='Deaths (Ave)',line_color='black',line_width=3,row=2,col=3)
 
+    # Cases
     fig['layout']['yaxis']['title']='Cases/Day'
+    
+    # Pos Rate
     fig['layout']['yaxis2']['title']='Positive Test Rate (%)'
-    # fig['layout']['yaxis3']['title']='Daily Tests'
+    
+    # Hospital
+    fig['layout']['yaxis3']['title']='Hospital Occupancy'
+    fig['layout']['yaxis3']['color']='navy'
     fig['layout']['yaxis4']['title']='Admissions/Day'
     fig['layout']['yaxis4']['color']='red'
-    fig['layout']['yaxis5']['title']='Patients in Hospital'
-    fig['layout']['yaxis5']['color']='navy'
+    
+    # ICU
+    fig['layout']['yaxis5']['title']='ICU Admissions/day'
+    
+    # Rates
     fig['layout']['yaxis6']['title']='Hospitalisation Rate (%)'
+    fig['layout']['yaxis6']['color']='purple'
     fig['layout']['yaxis7']['title']='ICU Rate (%)'
+    fig['layout']['yaxis7']['color']='brown'
+    
     fig['layout']['yaxis8']['title']='Deaths'
     fig['layout']['plot_bgcolor']='rgba(0,0,0,0)'
 
