@@ -124,12 +124,12 @@ def make_plots():
         fig['layout']['yaxis7'].update(range=[-0.01, 1], autorange=False)
     #
     # ICU Rate
-    #
+    
 
     df_hosp=df_hospital.copy()
     df_hosp['ICU+10']=df_hospital['ICUAdmissions'].shift(-ICU_OFFSET)
-    df_hosp['icu_rate']=df_hosp['ICU+10']/df_cases['DailyCases']
-    df_hosp=df_hosp.dropna()
+    df_hosp['icu_rate']=(df_hosp['ICU+10']/df_cases['DailyCases'])*100
+    # df_hosp=df_hosp.dropna()
     fig.add_scatter(x=df_hosp['icu_rate'].iloc[-2*RANGE:].index,y=df_hosp['icu_rate'].iloc[-2*RANGE:], mode='lines',name='ICU Rate (Ave)',line_color='brown',opacity=0.1,row=2,col=2,secondary_y=True)   
     fig.add_scatter(x=df_hosp['icu_rate'].iloc[-2*RANGE:].index,y=df_hosp['icu_rate'].iloc[-2*RANGE:].rolling(window=7).mean(), mode='lines',name='ICU Rate (Ave)',line_color='brown',line_width=3,row=2,col=2,secondary_y=True)   
 
