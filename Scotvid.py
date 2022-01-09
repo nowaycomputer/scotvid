@@ -17,37 +17,42 @@ def get_remote_data():
     df_cases=pd.read_csv('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/287fc645-4352-4477-9c8c-55bc054b7e76/download/daily_cuml_scot_20211210.csv', index_col='Date',parse_dates=True)
     df_hospital=pd.read_csv('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/2dd8534b-0a6f-4744-9253-9565d62f96c2/download/trend_hb_20211210.csv', index_col='Date',parse_dates=True)
     gov_uk_hospital_scot=pd.read_csv('https://coronavirus.data.gov.uk/api/v1/data?filters=areaType=nation;areaName=Scotland&structure=%7B%22areaType%22:%22areaType%22,%22areaName%22:%22areaName%22,%22areaCode%22:%22areaCode%22,%22date%22:%22date%22,%22hospitalCases%22:%22hospitalCases%22%7D&format=csv',index_col='date',parse_dates=True)
+    gov_uk_icu_scot=pd.read_csv('https://coronavirus.data.gov.uk/api/v1/data?filters=areaType=nation;areaName=Scotland&structure=%7B%22areaType%22:%22areaType%22,%22areaName%22:%22areaName%22,%22areaCode%22:%22areaCode%22,%22date%22:%22date%22,%22covidOccupiedMVBeds%22:%22covidOccupiedMVBeds%22%7D&format=csv',index_col='date',parse_dates=True)
+
     df_hospital=df_hospital[df_hospital['HBName']=='Scotland']
 
     df_cases.to_csv('data/df_cases.csv')
     df_hospital.to_csv('data/df_hospital.csv')
+    gov_uk_hospital_scot.to_csv('data/df_gov_uk_hospital_scot.csv')
+    gov_uk_icu_scot.to_csv('data/df_gov_uk_icu_scot.csv')
 
-    return df_cases, df_hospital, gov_uk_hospital_scot
+    return df_cases, df_hospital, gov_uk_hospital_scot, gov_uk_icu_scot
 
 def get_local_data():
     df_cases=pd.read_csv('data/df_cases.csv', index_col='Date',parse_dates=True)
     df_hospital=pd.read_csv('data/df_hospital.csv', index_col='Date',parse_dates=True)
     gov_uk_hospital_scot=pd.read_csv('data/gov_uk_hospital_scot.csv', index_col='date',parse_dates=True)
     df_hospital=df_hospital[df_hospital['HBName']=='Scotland']
-
-    return df_cases, df_hospital, gov_uk_hospital_scot
+    gov_uk_icu_scot=pd.read_csv('data/df_gov_uk_icu_scot.csv', index_col='date',parse_dates=True)
+                                
+    return df_cases, df_hospital, gov_uk_hospital_scot,gov_uk_icu_scot
 
 @st.cache(ttl=3600,suppress_st_warning=True, show_spinner=False)
 def get_data():
     try:
-        df_cases, df_hospital, gov_uk_hospital_scot = get_remote_data()
-        return df_cases, df_hospital, gov_uk_hospital_scot
+        df_cases, df_hospital, gov_uk_hospital_scot, gov_uk_icu_scot = get_remote_data()
+        return df_cases, df_hospital, gov_uk_hospital_scot,gov_uk_icu_scot
     except:
-        df_cases, df_hospital, gov_uk_hospital_scot = get_local_data()
-        return df_cases, df_hospital, gov_uk_hospital_scot
+        df_cases, df_hospital, gov_uk_hospital_scot, gov_uk_icu_scot = get_local_data()
+        return df_cases, df_hospital, gov_uk_hospital_scot,gov_uk_icu_scot
 
 
 # @st.cache(suppress_st_warning=True, show_spinner=False)
 def make_plots():
 
-    df_cases, df_hospital, gov_uk_hospital_scot = get_data()
+    df_cases, df_hospital, gov_uk_hospital_scot, gov_uk_icu_scot = get_data()
     st.title('Scotland Covid Update')
-    # b,c = st.columns([1,5])
+
     col, buff, buff2 = st.columns(3)
     buff.write('')
     col.info('Updated on '+(df_cases.index[-1]+pd.Timedelta(days=1, hours=14)).strftime("%d/%m/%Y %H:%M:%S"))
@@ -70,20 +75,23 @@ def make_plots():
     
     case_box,pos_box,adm_box,icu_box, death_box=st.columns([1,1,1,1,1])
     
+    # Metrics calculation
     case_diff=cases_ma.iloc[-1].values[0]-cases_ma.iloc[-8].values[0]
     pos_diff=hosp_ma['PositivePercentage'].iloc[-1]-hosp_ma['PositivePercentage'].iloc[-8]
     adm_diff=hosp_ma_no_na['HospitalAdmissions'].iloc[-1]-hosp_ma_no_na['HospitalAdmissions'].iloc[-8]
     icu_diff=hosp_ma_no_na['ICUAdmissions'].iloc[-1]-hosp_ma_no_na['ICUAdmissions'].iloc[-8]
     death_diff=hosp_ma_no_na['DailyDeaths'].iloc[-1]-hosp_ma_no_na['DailyDeaths'].iloc[-8]
     
+    # Metrics render
     case_box.metric(label="Daily Cases (vs last wk)", value=str(int(cases_ma.iloc[-1].values[0])), delta=str(int(case_diff)),delta_color="inverse")
     pos_box.metric(label="Daily Positive Rate (vs last wk)", value=str(np.round(hosp_ma['PositivePercentage'].iloc[-1],1))+"%", delta=str(np.round(pos_diff,1))+"%",delta_color="inverse")
     adm_box.metric(label="Daily Admissions (vs last wk)",value=str(int(np.round(hosp_ma_no_na['HospitalAdmissions'].iloc[-1],0))), delta=str(int(np.round(adm_diff,0))),delta_color="inverse")
     icu_box.metric(label="Daily ICU Admissions (vs last wk)",value=str(int(np.round(hosp_ma_no_na['ICUAdmissions'].iloc[-1],0))), delta=str(int(np.round(icu_diff,0))),delta_color="inverse")
     death_box.metric(label="Daily Deaths (vs last wk)",value=str(int(np.round(hosp_ma_no_na['DailyDeaths'].iloc[-1],0))), delta=str(int(np.round(death_diff,1))),delta_color="inverse")
 
+    # Configure plotting axis layout
     specs=[[{"secondary_y": False}, {"secondary_y": False},{"secondary_y": True}], 
-                           [{"secondary_y": False}, {"secondary_y": True},{"secondary_y": False}]
+                           [{"secondary_y": True}, {"secondary_y": True},{"secondary_y": False}]
                            ]
 
     fig = make_subplots(rows=2,cols=3,specs=specs,shared_xaxes='all',subplot_titles=['Cases','Positive Test Rate','Hospital','ICU Admissions', 'Hospital and ICU Rates', 'Deaths'],vertical_spacing = 0.15,horizontal_spacing = 0.1)
@@ -97,7 +105,6 @@ def make_plots():
     #
     # Pos Rate
     #
-
     fig.add_scatter(x=df_hospital.iloc[-2*RANGE:-ADJ].index, y=df_hospital['PositivePercentage'].iloc[-2*RANGE:-1], mode='lines',name='Pos Rate',line_color='green',opacity=0.25,row=1,col=2)
     fig.add_scatter(x=hosp_ma.index, y=hosp_ma['PositivePercentage'], mode='lines',name='Pos Rate (Ave)',line_color='green',line_width=3,row=1,col=2)
     # fig.add_bar(x=df_hospital.iloc[-2*RANGE:-1].index,y=df_hospital['TotalTests'].iloc[-2*RANGE:-1],opacity=0.3,row=1,col=2,secondary_y=True,name='Tests',marker_color='orange')
@@ -110,34 +117,42 @@ def make_plots():
     # Hospital Patients
     fig.add_scatter(x=gov_uk_hospital_scot.index, y=gov_uk_hospital_scot['hospitalCases'], mode='lines',name='In Hospital',line_color='navy',row=1,col=3,secondary_y=True, line_width=3)
     
+    # Create a copy that we can edit without disrupting the streamlit cacheing
+    # TODO: move this preprocessing into the cached function
+    df_hosp=df_hospital.copy()
+    
+    df_hosp['ICU+10']=df_hospital['ICUAdmissions'].shift(-ICU_OFFSET)
+    df_hosp['hosp+10']=df_hospital['HospitalAdmissions'].shift(-HOSPITAL_OFFSET)
+    
+    df_hosp['hosp_rate']=(df_hosp['hosp+10']/df_cases['DailyCases'])*100
+    df_hosp['icu_rate']=(df_hosp['ICU+10']/df_cases['DailyCases'])*100
+    
     #
     # Hosp Rate
     #
+    fig.add_scatter(x=df_hospital.iloc[-RANGE:].index, y=(df_hosp['hosp_rate'].iloc[-RANGE:]), mode='lines',name='Hosp. Rate',line_color='purple',opacity=0.2,row=2,col=2)
+    fig.add_scatter(x=df_hospital.iloc[-RANGE:].index, y=(df_hosp['hosp_rate'].iloc[-RANGE:].rolling(window=7).mean()), mode='lines',name='Hosp. Rate (Ave)',line_color='purple',line_width=3,row=2,col=2)
 
-    fig.add_scatter(x=df_hospital.iloc[-RANGE:].index, y=((df_hospital['HospitalAdmissions'].iloc[-RANGE:-1].shift(-HOSPITAL_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1])*100), mode='lines',name='Hosp. Rate',line_color='purple',opacity=0.1,row=2,col=2)
-    fig.add_scatter(x=df_hospital.iloc[-RANGE:].index, y=((df_hospital['HospitalAdmissions'].iloc[-RANGE:-1].shift(-HOSPITAL_OFFSET)/df_cases['DailyCases'].iloc[-RANGE:-1])*100).rolling(window=7).mean(), mode='lines',name='Hosp. Rate (Ave)',line_color='purple',line_width=3,row=2,col=2)
+    # Hacky adjustment for scales to allow for spurious spikes in rates
     if RANGE==-1:
-        fig['layout']['yaxis6'].update(range=[-0.01, 45], autorange=False)
-        fig['layout']['yaxis7'].update(range=[-0.01, 45], autorange=False)
+        fig['layout']['yaxis7'].update(range=[-0.01, 10], autorange=False)
+        fig['layout']['yaxis8'].update(range=[-0.01, 45], autorange=False)
     else:
-        fig['layout']['yaxis6'].update(range=[-0.01, 6], autorange=False)
-        fig['layout']['yaxis7'].update(range=[-0.01, 1], autorange=False)
+        fig['layout']['yaxis7'].update(range=[-0.01, 6], autorange=False)
+        fig['layout']['yaxis8'].update(range=[-0.01, 1], autorange=False)
+        
     #
     # ICU Rate
-    
-
-    df_hosp=df_hospital.copy()
-    df_hosp['ICU+10']=df_hospital['ICUAdmissions'].shift(-ICU_OFFSET)
-    df_hosp['icu_rate']=(df_hosp['ICU+10']/df_cases['DailyCases'])*100
-    # df_hosp=df_hosp.dropna()
-    fig.add_scatter(x=df_hosp['icu_rate'].iloc[-2*RANGE:].index,y=df_hosp['icu_rate'].iloc[-2*RANGE:], mode='lines',name='ICU Rate (Ave)',line_color='brown',opacity=0.1,row=2,col=2,secondary_y=True)   
+    fig.add_scatter(x=df_hosp['icu_rate'].iloc[-2*RANGE:].index,y=df_hosp['icu_rate'].iloc[-2*RANGE:], mode='lines',name='ICU Rate (Ave)',line_color='brown',opacity=0.2,row=2,col=2,secondary_y=True)   
     fig.add_scatter(x=df_hosp['icu_rate'].iloc[-2*RANGE:].index,y=df_hosp['icu_rate'].iloc[-2*RANGE:].rolling(window=7).mean(), mode='lines',name='ICU Rate (Ave)',line_color='brown',line_width=3,row=2,col=2,secondary_y=True)   
 
     # ICU Admissions
     fig.add_scatter(x=df_hospital.iloc[-2*RANGE:].index, y=df_hospital['ICUAdmissions'].iloc[-2*RANGE:], mode='lines',name='Admissions',line_color='red',opacity=0.25,row=2,col=1)
     fig.add_scatter(x=df_hospital.iloc[-2*RANGE:].rolling(window=7).mean().index, y=df_hospital['ICUAdmissions'].iloc[-2*RANGE:].rolling(window=7).mean(), mode='lines',name='Admissions (Ave)',line_color='red',line_width=3,row=2,col=1)
-   
     
+    # ICU Occupancy
+    fig.add_scatter(x=gov_uk_icu_scot.index, y=gov_uk_icu_scot['covidOccupiedMVBeds'], mode='lines',name='In ICU',line_color='navy',line_width=3,row=2,col=1,secondary_y=True)
+    # st.write(gov_uk_icu_scot.head())
     #
     # Deaths
     #
@@ -159,14 +174,17 @@ def make_plots():
     
     # ICU
     fig['layout']['yaxis5']['title']='ICU Admissions/day'
+    fig['layout']['yaxis5']['color']='red'
+    fig['layout']['yaxis6']['title']='ICU Occupancy'
+    fig['layout']['yaxis6']['color']='navy'
     
     # Rates
-    fig['layout']['yaxis6']['title']='Hospitalisation Rate (%)'
-    fig['layout']['yaxis6']['color']='purple'
-    fig['layout']['yaxis7']['title']='ICU Rate (%)'
-    fig['layout']['yaxis7']['color']='brown'
+    fig['layout']['yaxis7']['title']='Hospitalisation Rate (%)'
+    fig['layout']['yaxis7']['color']='purple'
+    fig['layout']['yaxis8']['title']='ICU Rate (%)'
+    fig['layout']['yaxis8']['color']='brown'
     
-    fig['layout']['yaxis8']['title']='Deaths'
+    fig['layout']['yaxis9']['title']='Deaths'
     fig['layout']['plot_bgcolor']='rgba(0,0,0,0)'
 
 
