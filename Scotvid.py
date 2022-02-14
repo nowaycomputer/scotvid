@@ -77,14 +77,15 @@ def make_plots():
     
     # Metrics calculation
     case_diff=cases_ma.iloc[-1].values[0]-cases_ma.iloc[-8].values[0]
-    pos_diff=hosp_ma['PositivePercentage'].iloc[-1]-hosp_ma['PositivePercentage'].iloc[-8]
+    # pos_diff=hosp_ma['PositivePercentage'].iloc[-1]-hosp_ma['PositivePercentage'].iloc[-8]
     adm_diff=hosp_ma_no_na['HospitalAdmissions'].iloc[-1]-hosp_ma_no_na['HospitalAdmissions'].iloc[-8]
     icu_diff=hosp_ma_no_na['ICUAdmissions'].iloc[-1]-hosp_ma_no_na['ICUAdmissions'].iloc[-8]
     death_diff=hosp_ma_no_na['DailyDeaths'].iloc[-1]-hosp_ma_no_na['DailyDeaths'].iloc[-8]
     
     # Metrics render
     case_box.metric(label="Daily Cases (vs last wk)", value=str(int(cases_ma.iloc[-1].values[0])), delta=str(int(case_diff)),delta_color="inverse")
-    pos_box.metric(label="Daily Positive Rate (vs last wk)", value=str(np.round(hosp_ma['PositivePercentage'].iloc[-1],1))+"%", delta=str(np.round(pos_diff,1))+"%",delta_color="inverse")
+    pos_box.metric(label="Broken",value=0)
+    # pos_box.metric(label="Daily Positive Rate (vs last wk)", value=str(np.round(hosp_ma['PositivePercentage'].iloc[-1],1))+"%", delta=str(np.round(pos_diff,1))+"%",delta_color="inverse")
     adm_box.metric(label="Daily Admissions (vs last wk)",value=str(int(np.round(hosp_ma_no_na['HospitalAdmissions'].iloc[-1],0))), delta=str(int(np.round(adm_diff,0))),delta_color="inverse")
     icu_box.metric(label="Daily ICU Admissions (vs last wk)",value=str(int(np.round(hosp_ma_no_na['ICUAdmissions'].iloc[-1],0))), delta=str(int(np.round(icu_diff,0))),delta_color="inverse")
     death_box.metric(label="Daily Deaths (vs last wk)",value=str(int(np.round(hosp_ma_no_na['DailyDeaths'].iloc[-1],0))), delta=str(int(np.round(death_diff,1))),delta_color="inverse")
@@ -105,8 +106,8 @@ def make_plots():
     #
     # Pos Rate
     #
-    fig.add_scatter(x=df_hospital.iloc[-2*RANGE:-ADJ].index, y=df_hospital['PositivePercentage'].iloc[-2*RANGE:-1], mode='lines',name='Pos Rate',line_color='green',opacity=0.25,row=1,col=2)
-    fig.add_scatter(x=hosp_ma.index, y=hosp_ma['PositivePercentage'], mode='lines',name='Pos Rate (Ave)',line_color='green',line_width=3,row=1,col=2)
+    # fig.add_scatter(x=df_hospital.iloc[-2*RANGE:-ADJ].index, y=df_hospital['PositivePercentage'].iloc[-2*RANGE:-1], mode='lines',name='Pos Rate',line_color='green',opacity=0.25,row=1,col=2)
+    # fig.add_scatter(x=hosp_ma.index, y=hosp_ma['PositivePercentage'], mode='lines',name='Pos Rate (Ave)',line_color='green',line_width=3,row=1,col=2)
     # fig.add_bar(x=df_hospital.iloc[-2*RANGE:-1].index,y=df_hospital['TotalTests'].iloc[-2*RANGE:-1],opacity=0.3,row=1,col=2,secondary_y=True,name='Tests',marker_color='orange')
 
     #
@@ -232,8 +233,8 @@ with st.spinner('Grabbing latest data...'):
     fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['DailyPositive'].iloc[-RANGE:-2].index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-2]['DailyPositive'], mode='lines',name='Cases',line_color='blue',opacity=0.25,row=1,col=1)
     fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['DailyPositive'].iloc[-RANGE:-2].rolling(window=7).mean().index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-2]['DailyPositive'].rolling(window=7).mean(), mode='lines',name='Cases (Ave)',line_color='blue',line_width=3,row=1,col=1)
     
-    fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['PositivePercentage'].iloc[-RANGE:-2].index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-2]['PositivePercentage'], mode='lines',name='Pos Rate',line_color='green',opacity=0.25,row=1,col=2)
-    fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['PositivePercentage'].iloc[-RANGE:-2].rolling(window=7).mean().index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-2]['PositivePercentage'].rolling(window=7).mean(), mode='lines',name='Pos Rate (Ave)',line_color='green',line_width=3,row=1,col=2)
+    # fig_city.aPositivePercentagedd_scatter(x=city_data[city_data['CAName']==city_option]['PositivePercentage'].iloc[-RANGE:-2].index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-2]['PositivePercentage'], mode='lines',name='Pos Rate',line_color='green',opacity=0.25,row=1,col=2)
+    # fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['PositivePercentage'].iloc[-RANGE:-2].rolling(window=7).mean().index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-2]['PositivePercentage'].rolling(window=7).mean(), mode='lines',name='Pos Rate (Ave)',line_color='green',line_width=3,row=1,col=2)
 
     fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['DailyDeaths'].iloc[-RANGE:-1].index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-1]['DailyDeaths'], mode='lines',name='Deaths',line_color='black',opacity=0.25,row=1,col=3)
     fig_city.add_scatter(x=city_data[city_data['CAName']==city_option]['DailyDeaths'].iloc[-RANGE:-1].rolling(window=7).mean().index, y=city_data[city_data['CAName']==city_option].iloc[-RANGE:-1]['DailyDeaths'].rolling(window=7).mean(), mode='lines',name='Deaths (Ave)',line_color='black',line_width=3,row=1,col=3)
@@ -265,12 +266,18 @@ with st.spinner('Grabbing latest data...'):
     # +'\n\n')
 
     with st.expander('View National Data'):
-        st.dataframe(data[['DailyPositive','CumulativePositive','DailyDeaths','CumulativeDeaths','TotalTests',
-                           'PositivePercentage','HospitalAdmissions','ICUAdmissions']])
+        # st.dataframe(data[['DailyPositive','CumulativePositive','DailyDeaths','CumulativeDeaths','TotalTests',
+        #                    'PositivePercentage','HospitalAdmissions','ICUAdmissions']])
+        st.dataframe(data[['DailyPositive','CumulativePositive','DailyDeaths','CumulativeDeaths',
+        'HospitalAdmissions','ICUAdmissions']])
     
+    # with st.expander('View Local Data'):
+    #     st.dataframe(city_data[city_data['CAName']==city_option][['DailyPositive','CumulativePositive','DailyDeaths','CumulativeDeaths','TotalTests',
+    #                        'PositivePercentage']])
+
     with st.expander('View Local Data'):
-        st.dataframe(city_data[city_data['CAName']==city_option][['DailyPositive','CumulativePositive','DailyDeaths','CumulativeDeaths','TotalTests',
-                           'PositivePercentage']])
+        st.dataframe(city_data[city_data['CAName']==city_option][['DailyPositive','CumulativePositive','DailyDeaths','CumulativeDeaths']])
+                    
 
 st.subheader('Notes')
 st.success("""
@@ -280,5 +287,5 @@ st.success("""
 \n\n-    All test/case data is by sample date
 \n\n-    Hospitalisation and ICU rates are rough estimates calculated using the ratio of hospital and ICU admissions 7 and 14 days respectively after the cases by sample date
 \n\n-    Not all data is synchronised to the same date and the most recent day isn't shown because it is always significantly incomplete
-\n\n-    All data is sourced from the [PHS OpenData Service](https://www.opendata.nhs.scot/dataset/covid-19-in-scotland)
+\n\n-    All data is sourced from the [PHS OpenData Service](https://www.opendata.nhs.scot/dataset/covid-19-in-scotland) and [Gov.uk](https://coronavirus.data.gov.uk/)
 """)

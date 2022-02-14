@@ -11,4 +11,4 @@ A demo interface is available [here](https://share.streamlit.io/nowaycomputer/sc
 - All test/case data is by sample date
 - Hospitalisation and ICU rates are rough estimates calculated using the ratio of hospital and ICU admissions 7 and 14 days respectively after the cases by sample date
 - Not all data is synchronised to the same date and the most recent day isn't generally shown because it is always significantly incomplete
-- All data is sourced from the [PHS OpenData Service](https://www.opendata.nhs.scot/dataset/covid-19-in-scotland)
+- All data is sourced from the [PHS OpenData Service](https://www.opendata.nhs.scot/dataset/covid-19-in-scotland) and [Gov.uk](https://coronavirus.data.gov.uk/)
